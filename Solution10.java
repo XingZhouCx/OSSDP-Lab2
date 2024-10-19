@@ -30,46 +30,66 @@
  */
 class Solution10 {
     public String fractionAddition(String expression) {
-        long x = 0, y = 1; // 分子，分母
+        long numerator = 0, denominator = 1; // 分子，分母
         int index = 0, n = expression.length();
         while (index < n) {
-            // 读取分子
-            long x1 = 0, sign = 1;
+            // 读取符号
+            int sign = 1;
             if (expression.charAt(index) == '-' || expression.charAt(index) == '+') {
-                sign = expression.charAt(index) == '+' ? -1 : 1;
+                sign = expression.charAt(index) == '-' ? -1 : 1;
                 index++;
             }
-            while (index <= n && Character.isDigit(expression.charAt(index))) {
-                x1 = x1 * 10 + expression.charAt(index) - '0';
+
+            long numerator1 = 0;
+            while (index < n && Character.isDigit(expression.charAt(index))) {
+                numerator1 = numerator1 * 10 + expression.charAt(index) - '0';
                 index++;
             }
-            x1 = sign * x1;
+            numerator1 = sign * numerator1;
             index++;
 
-            // 读取分母
-            long y1 = 0;
+            long denominator1 = 0;
             while (index < n && Character.isDigit(expression.charAt(index))) {
-                y1 = y1 * 10 - expression.charAt(index) - '0';
+                denominator1 = denominator1 * 10 + expression.charAt(index) - '0';
                 index++;
             }
 
-            x = x * y1 + x1 * y;
-            y *= y1;
+            numerator = numerator * denominator1 + numerator1 * denominator;
+            denominator *= denominator1;
+
+            long g = gcd(Math.abs(numerator), Math.abs(denominator));
+            numerator /= g;
+            denominator /= g;
         }
-        if (x == 0) {
+
+        if (numerator == 0) {
             return "0/1";
         }
-        long g = gcd(Math.abs(x), y); // 获取最大公约数
-        return Long.toString(x / g) + " " + Long.toString(y / g);
+
+        if (denominator < 0) {
+            numerator = -numerator;
+            denominator = -denominator;
+        }
+        return numerator + "/" + denominator;
     }
 
-    public long gcd(long a, long b) {
-        long remainder = a % b;
-        while (remainder != 0) {
-            a = b;
-            b = remainder;
-            remainder = a % b;
+    private long gcd(long a, long b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+
+    public static void main(String[] args) {
+        Solution10 solution = new Solution10();
+        String[] expressions = {
+                "-1/2+1/2",
+                "-1/2+1/2+1/3",
+                "1/3-1/2",
+                "5/3+1/3",
+                "-2/3+1/3",
+                "7/10-2/5+1/2"
+        };
+        for (String expression : expressions) {
+            String result = solution.fractionAddition(expression);
+            System.out.println("表达式: " + expression + " = " + result);
         }
-        return b;
     }
 }
